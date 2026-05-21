@@ -51,6 +51,7 @@ unsur = {
 # =====================================================
 
 def hitung_mr(rumus):
+
     pola = r'([A-Z][a-z]?)(\d*)'
     hasil = re.findall(pola, rumus)
 
@@ -122,18 +123,22 @@ if menu == "Informasi":
     st.subheader("3. Rumus Faktor Gravimetri")
 
     st.latex(r'''
-    FG = \frac{Ar\ Analit \times jumlah\ atom}{Mr\ Senyawa}
+    FG =
+    \frac{Ar\ Analit \times jumlah\ atom}
+    {Mr\ Senyawa}
     ''')
 
     st.subheader("4. Rumus Perhitungan Kadar")
 
     st.latex(r'''
-    Massa\ Analit = Massa\ Endapan \times FG
+    Massa\ Analit =
+    Massa\ Endapan \times FG
     ''')
 
     st.latex(r'''
     \%Kadar =
-    \frac{Massa\ Analit}{Massa\ Sampel}
+    \frac{Massa\ Analit}
+    {Massa\ Sampel}
     \times 100\%
     ''')
 
@@ -169,7 +174,7 @@ elif menu == "Kalkulator":
     st.header("🧪 Kalkulator Gravimetri")
 
     # =================================================
-    # KALKULATOR Mr
+    # KALKULATOR Mr / BM
     # =================================================
 
     st.subheader("🔬 Kalkulator Mr / BM")
@@ -184,7 +189,10 @@ elif menu == "Kalkulator":
         hasil = hitung_mr(rumus)
 
         if hasil:
-            st.success(f"Mr / BM {rumus} = {hasil:.3f}")
+
+            st.success(
+                f"Mr / BM {rumus} = {hasil:.4f}"
+            )
 
         else:
             st.error("Rumus kimia tidak valid")
@@ -231,7 +239,9 @@ elif menu == "Kalkulator":
 
     if st.button("Hitung Faktor Gravimetri"):
 
-        fg = (ar_analit * jumlah_atom) / mr_senyawa
+        fg = (
+            ar_analit * jumlah_atom
+        ) / mr_senyawa
 
         st.success(
             f"Faktor Gravimetri = {fg:.4f}"
@@ -302,7 +312,10 @@ elif menu == "Tabel Unsur":
         "Ar": unsur.values()
     })
 
-    st.dataframe(df, use_container_width=True)
+    st.dataframe(
+        df,
+        use_container_width=True
+    )
 
     st.info("""
     Tabel unsur digunakan untuk membantu
@@ -314,4 +327,7 @@ elif menu == "Tabel Unsur":
 # =====================================================
 
 st.markdown("---")
-st.caption("⚗️ Dibuat menggunakan Streamlit")
+
+st.caption(
+    "⚗️ Dibuat menggunakan Streamlit"
+)
