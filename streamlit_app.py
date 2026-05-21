@@ -17,33 +17,33 @@ st.set_page_config(
 # =====================================================
 
 unsur = {
-    "H": 1.008,
-    "He": 4.0026,
+    "H": 1.01,
+    "He": 4.00,
     "Li": 6.94,
-    "Be": 9.0122,
+    "Be": 9.01,
     "B": 10.81,
-    "C": 12.011,
-    "N": 14.007,
-    "O": 15.999,
-    "F": 18.998,
-    "Ne": 20.180,
-    "Na": 22.990,
-    "Mg": 24.305,
-    "Al": 26.982,
-    "Si": 28.085,
-    "P": 30.974,
+    "C": 12.01,
+    "N": 14.01,
+    "O": 16.00,
+    "F": 19.00,
+    "Ne": 20.18,
+    "Na": 22.99,
+    "Mg": 24.31,
+    "Al": 26.98,
+    "Si": 28.09,
+    "P": 30.97,
     "S": 32.06,
     "Cl": 35.45,
-    "K": 39.098,
-    "Ca": 40.078,
-    "Fe": 55.845,
-    "Cu": 63.546,
+    "K": 39.10,
+    "Ca": 40.08,
+    "Fe": 55.85,
+    "Cu": 63.55,
     "Zn": 65.38,
-    "Ag": 107.868,
-    "Ba": 137.327,
-    "Au": 196.967,
-    "Hg": 200.592,
-    "Pb": 207.2
+    "Ag": 107.87,
+    "Ba": 137.33,
+    "Au": 196.97,
+    "Hg": 200.59,
+    "Pb": 207.20
 }
 
 # =====================================================
@@ -191,7 +191,7 @@ elif menu == "Kalkulator":
         if hasil:
 
             st.success(
-                f"Mr / BM {rumus} = {hasil:.4f}"
+                f"Mr / BM {rumus} = {hasil:.2f}"
             )
 
         else:
@@ -218,7 +218,8 @@ elif menu == "Kalkulator":
         ar_analit = st.number_input(
             "Ar Analit",
             min_value=0.0,
-            value=0.0
+            value=0.00,
+            format="%.2f"
         )
 
     with col2:
@@ -233,8 +234,9 @@ elif menu == "Kalkulator":
 
         mr_senyawa = st.number_input(
             "Mr Senyawa",
-            min_value=1.0,
-            value=1.0
+            min_value=1.00,
+            value=1.00,
+            format="%.2f"
         )
 
     if st.button("Hitung Faktor Gravimetri"):
@@ -262,7 +264,8 @@ elif menu == "Kalkulator":
         massa_sampel = st.number_input(
             "Massa Sampel (gram)",
             min_value=0.0,
-            value=1.0
+            value=1.0000,
+            format="%.4f"
         )
 
     with col5:
@@ -270,7 +273,8 @@ elif menu == "Kalkulator":
         massa_endapan = st.number_input(
             "Massa Endapan (gram)",
             min_value=0.0,
-            value=0.0
+            value=0.0000,
+            format="%.4f"
         )
 
     with col6:
@@ -278,7 +282,8 @@ elif menu == "Kalkulator":
         faktor_gravimetri = st.number_input(
             "Faktor Gravimetri",
             min_value=0.0,
-            value=1.0
+            value=1.0000,
+            format="%.4f"
         )
 
     if st.button("Hitung Kadar"):
