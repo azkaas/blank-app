@@ -57,9 +57,12 @@ def hitung_mr(rumus):
     total = 0
 
     for simbol, jumlah in hasil:
+
         if simbol in unsur:
+
             jumlah = int(jumlah) if jumlah else 1
             total += unsur[simbol] * jumlah
+
         else:
             return None
 
@@ -73,7 +76,7 @@ st.title("⚗️ Kalkulator Gravimetri")
 
 st.markdown("""
 Web aplikasi perhitungan kimia untuk membantu
-analisis gravimetri dan perhitungan massa molekul relatif.
+analisis gravimetri dan perhitungan kadar.
 """)
 
 st.markdown("---")
@@ -98,52 +101,63 @@ if menu == "Informasi":
     st.subheader("1. Pengertian Analisis Gravimetri")
 
     st.write("""
-    Analisis gravimetri merupakan metode analisis kuantitatif
+    Analisis gravimetri adalah metode analisis kuantitatif
     yang dilakukan dengan mengukur massa suatu zat.
-    
-    Pada metode ini, analit diubah menjadi bentuk endapan
-    yang stabil kemudian ditimbang untuk menentukan kadar zat.
+
+    Dalam metode ini, analit diubah menjadi endapan stabil,
+    kemudian ditimbang untuk menentukan kadar zat.
     """)
 
-    st.subheader("2. Prinsip Gravimetri")
+    st.subheader("2. Prinsip Analisis Gravimetri")
 
     st.write("""
-    Tahapan utama analisis gravimetri:
+    Tahapan utama gravimetri:
     - Pembentukan endapan
-    - Penyaringan endapan
+    - Penyaringan
     - Pencucian endapan
     - Pengeringan atau pemijaran
     - Penimbangan massa endapan
     """)
 
-    st.subheader("3. Perhitungan Kadar")
+    st.subheader("3. Rumus Faktor Gravimetri")
 
     st.latex(r'''
-    Massa\ Analit = Massa\ Endapan \times Faktor\ Gravimetri
+    FG = \frac{Ar\ Analit \times jumlah\ atom}{Mr\ Senyawa}
+    ''')
+
+    st.subheader("4. Rumus Perhitungan Kadar")
+
+    st.latex(r'''
+    Massa\ Analit = Massa\ Endapan \times FG
     ''')
 
     st.latex(r'''
-    \%Kadar = \frac{Massa\ Analit}{Massa\ Sampel} \times 100\%
+    \%Kadar =
+    \frac{Massa\ Analit}{Massa\ Sampel}
+    \times 100\%
     ''')
 
-    st.subheader("4. Pengertian Ar")
+    st.subheader("5. Pengertian Ar")
 
     st.write("""
-    Ar (Atom Relatif) adalah massa atom relatif suatu unsur
-    dibandingkan terhadap 1/12 massa atom karbon-12.
+    Ar (Atom Relatif) adalah massa atom relatif
+    suatu unsur dibandingkan terhadap
+    1/12 massa atom karbon-12.
     """)
 
-    st.subheader("5. Pengertian Mr / BM")
+    st.subheader("6. Pengertian Mr / BM")
 
     st.write("""
-    Mr (Massa Molekul Relatif) atau BM (Berat Molekul)
-    adalah jumlah seluruh Ar unsur-unsur penyusun senyawa.
+    Mr (Massa Molekul Relatif) atau BM
+    adalah jumlah seluruh Ar unsur-unsur
+    penyusun senyawa.
     """)
 
     st.write("Contoh:")
 
     st.latex(r'''
-    H_2SO_4 = (2 \times H) + (1 \times S) + (4 \times O)
+    H_2SO_4 =
+    (2 \times H) + (1 \times S) + (4 \times O)
     ''')
 
 # =====================================================
@@ -155,7 +169,7 @@ elif menu == "Kalkulator":
     st.header("🧪 Kalkulator Gravimetri")
 
     # =================================================
-    # KALKULATOR Mr / BM
+    # KALKULATOR Mr
     # =================================================
 
     st.subheader("🔬 Kalkulator Mr / BM")
@@ -165,12 +179,13 @@ elif menu == "Kalkulator":
         placeholder="Contoh: H2SO4"
     )
 
-    if st.button("Hitung Mr"):
+    if st.button("Hitung Mr / BM"):
 
         hasil = hitung_mr(rumus)
 
         if hasil:
             st.success(f"Mr / BM {rumus} = {hasil:.3f}")
+
         else:
             st.error("Rumus kimia tidak valid")
 
@@ -183,30 +198,44 @@ elif menu == "Kalkulator":
     st.subheader("⚖️ Kalkulator Faktor Gravimetri")
 
     st.latex(r'''
-    FG = \frac{Mr\ Analit}{Mr\ Endapan}
+    FG =
+    \frac{Ar\ Analit \times jumlah\ atom}
+    {Mr\ Senyawa}
     ''')
 
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
 
     with col1:
-        mr_analit = st.number_input(
-            "Mr Analit",
+
+        ar_analit = st.number_input(
+            "Ar Analit",
             min_value=0.0,
             value=0.0
         )
 
     with col2:
-        mr_endapan = st.number_input(
-            "Mr Endapan",
-            min_value=0.0,
+
+        jumlah_atom = st.number_input(
+            "Jumlah Atom Analit",
+            min_value=1,
+            value=1
+        )
+
+    with col3:
+
+        mr_senyawa = st.number_input(
+            "Mr Senyawa",
+            min_value=1.0,
             value=1.0
         )
 
     if st.button("Hitung Faktor Gravimetri"):
 
-        fg = mr_analit / mr_endapan
+        fg = (ar_analit * jumlah_atom) / mr_senyawa
 
-        st.success(f"Faktor Gravimetri = {fg:.4f}")
+        st.success(
+            f"Faktor Gravimetri = {fg:.4f}"
+        )
 
     st.markdown("---")
 
@@ -216,9 +245,9 @@ elif menu == "Kalkulator":
 
     st.subheader("📊 Perhitungan Kadar Gravimetri")
 
-    col3, col4 = st.columns(2)
+    col4, col5, col6 = st.columns(3)
 
-    with col3:
+    with col4:
 
         massa_sampel = st.number_input(
             "Massa Sampel (gram)",
@@ -226,23 +255,27 @@ elif menu == "Kalkulator":
             value=1.0
         )
 
+    with col5:
+
         massa_endapan = st.number_input(
             "Massa Endapan (gram)",
             min_value=0.0,
             value=0.0
         )
 
-    with col4:
+    with col6:
 
         faktor_gravimetri = st.number_input(
-            "Masukkan Faktor Gravimetri",
+            "Faktor Gravimetri",
             min_value=0.0,
             value=1.0
         )
 
     if st.button("Hitung Kadar"):
 
-        massa_analit = massa_endapan * faktor_gravimetri
+        massa_analit = (
+            massa_endapan * faktor_gravimetri
+        )
 
         persen_kadar = (
             massa_analit / massa_sampel
