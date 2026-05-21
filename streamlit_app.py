@@ -1,278 +1,271 @@
 import streamlit as st
+import pandas as pd
+import re
+
+# =====================================================
+# KONFIGURASI HALAMAN
+# =====================================================
 
 st.set_page_config(
     page_title="Kalkulator Gravimetri",
     page_icon="⚗️",
-    layout="centered"
-)
-
-st.title("⚗️ Kalkulator Gravimetri")
-st.write("Aplikasi perhitungan gravimetri kimia berbasis Streamlit")
-
-menu = st.sidebar.selectbox(
-    "Pilih Menu",
-    [
-        "Hitung Persen Kadar",
-        "Hitung Massa Endapan",
-        "Hitung Massa Analit",
-        "Hitung Faktor Gravimetri"
-    ]
+    layout="wide"
 )
 
 # =====================================================
-# HITUNG PERSEN KADAR
+# DATA UNSUR KIMIA
 # =====================================================
 
-if menu == "Hitung Persen Kadar":
-
-    st.header("📊 Perhitungan Persen Kadar")
-
-    massa_analit = st.number_input(
-        "Masukkan massa analit (gram)",
-        min_value=0.0,
-        format="%.4f"
-    )
-
-    massa_sampel = st.number_input(
-        "Masukkan massa sampel (gram)",
-        min_value=0.0,
-        format="%.4f"
-    )
-
-    if st.button("Hitung Persen Kadar"):
-
-        if massa_sampel > 0:
-            persen = (massa_analit / massa_sampel) * 100
-
-            st.success(f"Persen kadar = {persen:.2f}%")
-
-            st.latex(r"\%\ Kadar = \frac{massa\ analit}{massa\ sampel} \times 100\%")
-
-        else:
-            st.error("Massa sampel tidak boleh nol")
-
-# =====================================================
-# HITUNG MASSA ENDAPAN
-# =====================================================
-
-elif menu == "Hitung Massa Endapan":
-
-    st.header("🧪 Perhitungan Massa Endapan")
-
-    massa_kertas = st.number_input(
-        "Masukkan massa kertas saring kosong (gram)",
-        min_value=0.0,
-        format="%.4f"
-    )
-
-    massa_total = st.number_input(
-        "Masukkan massa kertas + endapan (gram)",
-        min_value=0.0,
-        format="%.4f"
-    )
-
-    if st.button("Hitung Massa Endapan"):
-
-        massa_endapan = massa_total - massa_kertas
-
-        st.success(f"Massa endapan = {massa_endapan:.4f} gram")
-
-        st.latex(r"massa\ endapan = massa\ total - massa\ kertas")
-
-# =====================================================
-# HITUNG MASSA ANALIT
-# =====================================================
-
-elif menu == "Hitung Massa Analit":
-
-    st.header("⚖️ Perhitungan Massa Analit")
-
-    massa_endapan = st.number_input(
-        "Masukkan massa endapan (gram)",
-        min_value=0.0,
-        format="%.4f"
-    )
-
-    faktor = st.number_input(
-        "Masukkan faktor gravimetri",
-        min_value=0.0,
-        format="%.6f"
-    )
-
-    if st.button("Hitung Massa Analit"):
-
-        massa_analit = massa_endapan * faktor
-
-        st.success(f"Massa analit = {massa_analit:.4f} gram")
-
-        st.latex(r"massa\ analit = massa\ endapan \times faktor\ gravimetri")
-
-# =====================================================
-# HITUNG FAKTOR GRAVIMETRI
-# =====================================================
-
-elif menu == "Hitung Faktor Gravimetri":
-
-    st.header("📘 Faktor Gravimetri")
-
-    Mr_analit = st.number_input(
-        "Masukkan Mr analit",
-        min_value=0.0,
-        format="%.4f"
-    )
-
-    Mr_endapan = st.number_input(
-        "Masukkan Mr endapan",
-        min_value=0.0,
-        format="%.4f"
-    )
-
-    if st.button("Hitung Faktor"):
-
-        if Mr_endapan > 0:
-            faktor = Mr_analit / Mr_endapan
-
-            st.success(f"Faktor gravimetri = {faktor:.6f}")
-
-            st.latex(r"Faktor\ Gravimetri = \frac{Mr\ Analit}{Mr\ Endapan}")
-
-        else:
-            st.error("Mr endapan tidak boleh nol")
-
-# =====================================================
-# KALKULATOR Mr / BM SENYAWA
-# =====================================================
-
-st.markdown("---")
-st.header("🧪 Kalkulator Mr / BM Senyawa")
-
-unsur_lengkap = {
+unsur = {
     "H": 1.008,
-    "He": 4.003,
+    "He": 4.0026,
     "Li": 6.94,
-    "Be": 9.012,
+    "Be": 9.0122,
     "B": 10.81,
-    "C": 12.01,
-    "N": 14.01,
-    "O": 16.00,
-    "F": 19.00,
-    "Ne": 20.18,
-    "Na": 22.99,
-    "Mg": 24.31,
-    "Al": 26.98,
-    "Si": 28.09,
-    "P": 30.97,
+    "C": 12.011,
+    "N": 14.007,
+    "O": 15.999,
+    "F": 18.998,
+    "Ne": 20.180,
+    "Na": 22.990,
+    "Mg": 24.305,
+    "Al": 26.982,
+    "Si": 28.085,
+    "P": 30.974,
     "S": 32.06,
     "Cl": 35.45,
-    "Ar": 39.95,
-    "K": 39.10,
-    "Ca": 40.08,
-    "Fe": 55.85,
-    "Cu": 63.55,
+    "K": 39.098,
+    "Ca": 40.078,
+    "Sc": 44.956,
+    "Ti": 47.867,
+    "V": 50.942,
+    "Cr": 51.996,
+    "Mn": 54.938,
+    "Fe": 55.845,
+    "Co": 58.933,
+    "Ni": 58.693,
+    "Cu": 63.546,
     "Zn": 65.38,
-    "Ag": 107.87,
-    "Ba": 137.33,
-    "Au": 196.97,
-    "Hg": 200.59,
+    "Ga": 69.723,
+    "Ge": 72.630,
+    "As": 74.922,
+    "Se": 78.971,
+    "Br": 79.904,
+    "Kr": 83.798,
+    "Rb": 85.468,
+    "Sr": 87.62,
+    "Ag": 107.868,
+    "Cd": 112.414,
+    "I": 126.904,
+    "Ba": 137.327,
+    "Pt": 195.084,
+    "Au": 196.967,
+    "Hg": 200.592,
     "Pb": 207.2
 }
 
-rumus = st.text_input(
-    "Masukkan rumus kimia (contoh: HCl, H2SO4, NaOH)",
-    ""
-)
+# =====================================================
+# FUNGSI HITUNG Mr / BM
+# =====================================================
 
-import re
-
-
-def hitung_mr(formula):
+def hitung_mr(rumus):
     pola = r'([A-Z][a-z]?)(\d*)'
-    hasil = re.findall(pola, formula)
+    hasil = re.findall(pola, rumus)
 
     total = 0
 
-    for unsur, jumlah in hasil:
-        if unsur in unsur_lengkap:
+    for simbol, jumlah in hasil:
+        if simbol in unsur:
             jumlah = int(jumlah) if jumlah else 1
-            total += unsur_lengkap[unsur] * jumlah
+            total += unsur[simbol] * jumlah
         else:
             return None
 
     return total
 
-
-if st.button("Hitung Mr / BM"):
-
-    mr = hitung_mr(rumus)
-
-    if mr:
-        st.success(f"Mr / BM {rumus} = {mr:.3f}")
-    else:
-        st.error("Rumus kimia tidak valid")
-
 # =====================================================
-# TABEL PERIODIK SEDERHANA
+# JUDUL
 # =====================================================
+
+st.title("⚗️ Kalkulator Gravimetri")
+
+st.markdown("""
+Aplikasi perhitungan kimia berbasis Streamlit untuk membantu
+analisis gravimetri dan perhitungan massa molekul relatif.
+""")
 
 st.markdown("---")
-st.header("🧬 Data Unsur dan Ar Relatif")
 
-unsur = {
-    "H": 1.008,
-    "He": 4.003,
-    "Li": 6.94,
-    "Be": 9.012,
-    "B": 10.81,
-    "C": 12.01,
-    "N": 14.01,
-    "O": 16.00,
-    "F": 19.00,
-    "Ne": 20.18,
-    "Na": 22.99,
-    "Mg": 24.31,
-    "Al": 26.98,
-    "Si": 28.09,
-    "P": 30.97,
-    "S": 32.06,
-    "Cl": 35.45,
-    "Ar": 39.95,
-    "K": 39.10,
-    "Ca": 40.08,
-    "Sc": 44.96,
-    "Ti": 47.87,
-    "V": 50.94,
-    "Cr": 52.00,
-    "Mn": 54.94,
-    "Fe": 55.85,
-    "Co": 58.93,
-    "Ni": 58.69,
-    "Cu": 63.55,
-    "Zn": 65.38,
-    "Ga": 69.72,
-    "Ge": 72.63,
-    "As": 74.92,
-    "Se": 78.97,
-    "Br": 79.90,
-    "Kr": 83.80,
-    "Rb": 85.47,
-    "Sr": 87.62,
-    "Ag": 107.87,
-    "Sn": 118.71,
-    "I": 126.90,
-    "Ba": 137.33,
-    "Au": 196.97,
-    "Hg": 200.59,
-    "Pb": 207.2
-}
+# =====================================================
+# SIDEBAR MENU
+# =====================================================
 
-pilih_unsur = st.selectbox(
-    "Pilih unsur kimia",
-    list(unsur.keys())
+menu = st.sidebar.selectbox(
+    "📂 Pilih Menu",
+    ["Informasi", "Kalkulator", "Tabel Unsur"]
 )
 
-st.success(f"Ar {pilih_unsur} = {unsur[pilih_unsur]}")
+# =====================================================
+# MENU INFORMASI
+# =====================================================
 
-st.dataframe(unsur.items())
+if menu == "Informasi":
+
+    st.header("📘 Informasi Analisis Gravimetri")
+
+    st.subheader("1. Pengertian Analisis Gravimetri")
+
+    st.write("""
+    Analisis gravimetri merupakan metode analisis kuantitatif
+    dalam kimia yang dilakukan dengan mengukur massa suatu zat.
+
+    Pada metode ini, analit diubah menjadi bentuk endapan
+    yang stabil kemudian ditimbang untuk menentukan kadar zat.
+    """)
+
+    st.subheader("2. Prinsip Analisis Gravimetri")
+
+    st.write("""
+    Prinsip dasar gravimetri meliputi:
+    - Pembentukan endapan
+    - Penyaringan endapan
+    - Pencucian endapan
+    - Pengeringan atau pemijaran
+    - Penimbangan massa endapan
+    """)
+
+    st.subheader("3. Rumus Perhitungan Kadar")
+
+    st.latex(r'''
+    \%Kadar = \frac{massa\ analit}{massa\ sampel} \times 100\%
+    ''')
+
+    st.write("""
+    Persen kadar digunakan untuk mengetahui banyaknya zat
+    analit dalam suatu sampel.
+    """)
+
+    st.subheader("4. Pengertian Ar")
+
+    st.write("""
+    Ar (Atom Relatif) adalah massa atom suatu unsur dibandingkan
+    terhadap 1/12 massa atom karbon-12.
+    """)
+
+    st.subheader("5. Pengertian Mr / BM")
+
+    st.write("""
+    Mr (Massa Molekul Relatif) atau BM (Berat Molekul)
+    adalah jumlah seluruh Ar unsur-unsur penyusun senyawa.
+    """)
+
+    st.write("Contoh:")
+
+    st.latex(r'''
+    H_2SO_4 = (2 \times H) + (1 \times S) + (4 \times O)
+    ''')
+
+    st.write("""
+    sehingga nilai Mr H₂SO₄ diperoleh dari penjumlahan seluruh Ar.
+    """)
+
+# =====================================================
+# MENU KALKULATOR
+# =====================================================
+
+elif menu == "Kalkulator":
+
+    st.header("🧪 Kalkulator Gravimetri")
+
+    # -----------------------------------------
+    # KALKULATOR Mr
+    # -----------------------------------------
+
+    st.subheader("🔬 Kalkulator Mr / BM")
+
+    rumus = st.text_input(
+        "Masukkan Rumus Kimia",
+        placeholder="Contoh: H2SO4"
+    )
+
+    if st.button("Hitung Mr / BM"):
+
+        hasil = hitung_mr(rumus)
+
+        if hasil:
+            st.success(f"Mr / BM {rumus} = {hasil:.3f}")
+        else:
+            st.error("Rumus kimia tidak valid.")
+
+    st.markdown("---")
+
+    # -----------------------------------------
+    # PERHITUNGAN GRAVIMETRI
+    # -----------------------------------------
+
+    st.subheader("⚖️ Perhitungan Gravimetri")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+
+        massa_sampel = st.number_input(
+            "Massa Sampel (gram)",
+            min_value=0.0,
+            value=1.0
+        )
+
+        massa_endapan = st.number_input(
+            "Massa Endapan (gram)",
+            min_value=0.0,
+            value=0.0
+        )
+
+    with col2:
+
+        faktor_gravimetri = st.number_input(
+            "Faktor Gravimetri",
+            min_value=0.0,
+            value=1.0
+        )
+
+    massa_analit = massa_endapan * faktor_gravimetri
+
+    if massa_sampel > 0:
+        persen_kadar = (massa_analit / massa_sampel) * 100
+    else:
+        persen_kadar = 0
+
+    st.markdown("### ✅ Hasil")
+
+    st.write(f"**Massa Analit = {massa_analit:.4f} gram**")
+    st.write(f"**Persen Kadar = {persen_kadar:.2f}%**")
+
+# =====================================================
+# MENU TABEL UNSUR
+# =====================================================
+
+elif menu == "Tabel Unsur":
+
+    st.header("🧬 Tabel Unsur Kimia dan Ar")
+
+    df = pd.DataFrame({
+        "Unsur": unsur.keys(),
+        "Ar": unsur.values()
+    })
+
+    st.dataframe(df, use_container_width=True)
+
+    st.info("""
+    Tabel di atas berisi beberapa unsur kimia beserta
+    nilai Ar (Atom Relatif) yang digunakan dalam
+    perhitungan massa molekul relatif (Mr/BM).
+    """)
+
+# =====================================================
+# FOOTER
+# =====================================================
 
 st.markdown("---")
-st.caption("Dibuat dengan Python dan Streamlit")
+st.caption("⚗️ Dibuat menggunakan Streamlit dan Python")
+
